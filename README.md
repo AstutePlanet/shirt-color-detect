@@ -40,3 +40,8 @@ Installing OpenCV 3.2 from source Python 3.6
 * `make -j4`
 * make install
 
+Work in progress
+----------------
+
+![alt text](https://i.imgur.com/xszs5kI.jpg "Yo Ssup?")
+

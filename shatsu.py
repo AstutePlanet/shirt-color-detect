@@ -63,17 +63,24 @@ class Shatsu(object):
             try:
                 # shirt region 1 (left)
                 shirt_x = x + (w // 3) - offset_x_left
-                sensitivity_1 = self.shirt_region(blur, shirt_x, shirt_y, shirt_h, shirt_w, '1')
+                sensitivity_1 = self.shirt_region(blur, shirt_x, shirt_y, shirt_h, shirt_w)
                 cv2.rectangle(img, (shirt_x, shirt_y),
                               (shirt_x+shirt_w, shirt_y+shirt_h), (255, 0, 0), 2)
 
                 # shirt region 2 (right)
                 shirt_x = x + (w // 3) + offset_x_right
-                sensitivity_2 = self.shirt_region(blur, shirt_x, shirt_y, shirt_h, shirt_w, '2')
+                sensitivity_2 = self.shirt_region(blur, shirt_x, shirt_y, shirt_h, shirt_w)
                 cv2.rectangle(img, (shirt_x, shirt_y),
                               (shirt_x+shirt_w, shirt_y+shirt_h), (255, 0, 0), 2)
 
-                sensitivity = sensitivity_1 or sensitivity_2
+                # shirt region 3 (bottom)
+                shirt_y = y + h + 130
+                shirt_x = x + (w // 3)
+                sensitivity_3 = self.shirt_region(blur, shirt_x, shirt_y, shirt_h, shirt_w)
+                cv2.rectangle(img, (shirt_x, shirt_y),
+                              (shirt_x+shirt_w, shirt_y+shirt_h), (255, 0, 0), 2)
+
+                sensitivity = sensitivity_1 or sensitivity_2 or sensitivity_3
                 break
             except cv2.error:
                 logging.debug(f"Error in K means {self.img_path[3:]}")
@@ -85,7 +92,7 @@ class Shatsu(object):
         if detected:
             self.img_path = self.img_path.split('/')[-1]
 
-            cv2.imwrite(('true_positive/' if sensitivity else 'false_negative/')+self.img_path, img)
+            cv2.imwrite(('uniform/' if sensitivity else 'no_uniform/')+self.img_path, img)
         else:
             # cv2.imwrite('noface/shirt_'+f[3:], img)
             logging.debug(f"No face detected in {self.img_path[3:]}")

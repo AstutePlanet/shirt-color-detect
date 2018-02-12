@@ -1,6 +1,7 @@
 from glob import glob
 import math
 import logging
+import urllib
 
 import numpy as np
 import cv2
@@ -39,7 +40,7 @@ class Shatsu(object):
         try:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         except cv2.error:
-            logging.debug(f"Error on gray scale conversion {self.img_path[3:]}")
+            logging.debug("Error on gray scale conversion {name}".format(name=self.img_path[3:]))
 
         faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
         detected = False
@@ -83,10 +84,10 @@ class Shatsu(object):
                 sensitivity = sensitivity_1 or sensitivity_2 or sensitivity_3
                 break
             except cv2.error:
-                logging.debug(f"Error in K means {self.img_path[3:]}")
+                logging.debug("Error in K means {name}".format(name=self.img_path[3:]))
                 continue
             except ZeroDivisionError:
-                logging.debug(f"Division by Zero {self.img_path[3:]}")
+                logging.debug("Division by Zero {name}".format(name=self.img_path[3:]))
                 continue
 
         if detected:
@@ -95,7 +96,7 @@ class Shatsu(object):
             cv2.imwrite(('uniform/' if sensitivity else 'no_uniform/')+self.img_path, img)
         else:
             # cv2.imwrite('noface/shirt_'+f[3:], img)
-            logging.debug(f"No face detected in {self.img_path[3:]}")
+            logging.debug("No face detected in {name}".format(name=self.img_path[3:]))
 
     def shirt_region(self, blur, shirt_x, shirt_y, shirt_h, shirt_w, name):
         crop_img = blur[shirt_y:shirt_y+shirt_h, shirt_x:shirt_x+shirt_w]
@@ -125,6 +126,13 @@ class Shatsu(object):
         diff = abs(g-b)
 
         return True if diff <= 20 and max(g, b) - 20 >= r else False
+
+    def url_to_image(url):
+        resp = urllib.urlopen(url)
+        image = np.asarray(bytearray(resp.read()), dtype="uint8")
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+
+        return image
 
 
 if __name__ == '__main__':
